@@ -31,7 +31,6 @@ class Compilator:
         self.current_func = None
         self.lines = list(filter(None, re.split(r'\s*\n\s*', code)))
         self.line_index = 0
-        self.byte_pointer = 0
         self.main_func = None
         self.prog_name = name
 
@@ -60,7 +59,7 @@ class Compilator:
     def _addfunc(self, name):
         if (name == self.prog_name or not self.main_func):
             self.main_func = name
-        self.function_table[name] = self.byte_pointer
+        self.function_table[name] = None
         self.function_code[name] = [(Type.command, Command.newfunc)]
         self.current_func = name
 
@@ -115,28 +114,30 @@ class Compilator:
 
     def _save(self):
         byte_vector = []
+
         #add main func
+        self.function_table[self.main_func] = 0
         for pair in self.function_code[self.main_func]:
             byte_vector.append(pair[0])
-            if (pair[0] == Type.fcall):
-                byte_vector.append(self.function_table[pair[1]])
-            else:
-                byte_vector.append(pair[1])
+            byte_vector.append(pair[1])
         byte_vector.append(Type.command)
-        byte_vector.append(Command.endprog)
+        byte_vector.append(Command.error)
+
+        #add other funcs
         for f in self.function_code:
             if f == self.main_func:
                 continue
-            for pair in f:
+            self.function_table[f] = int(len(byte_vector) / 2)
+            for pair in self.function_code[f]:
                 byte_vector.append(pair[0])
-                if (pair[0] == Type.fcall):
-                    byte_vector.append(self.function_table[pair[1]])
-                else:
-                    byte_vector.append(pair[1])
+                byte_vector.append(pair[1])
             byte_vector.append(Type.command)
             byte_vector.append(Command.error)
 
-        print(byte_vector)
+        for i in range(0, len(byte_vector), 2):
+            if byte_vector[i] == Type.fcall:
+                byte_vector[i + 1] = self.function_table[byte_vector[i + 1]]
+
         with open(self.prog_name + '.bin', 'wb') as f:
             f.write(bytes(byte_vector))
 
@@ -148,16 +149,6 @@ def main():
     with open(name) as f:
         code = f.read()
         Compilator(name, code)
-
-    # while(True):
-    #     commands = re.split(r'([\(\)\s;])', lines[line_index])
-    #     commands = [c for c in commands if not re.fullmatch('\s*', c) ]
-    #     line_index += 1
-    #     if (len(commands) > 0):
-    #         if commands[0][0] == '#':
-    #             continue
-    #         if commands[0][0] == ':':
-
 
 if __name__ == "__main__":
     main()
