@@ -131,7 +131,7 @@ class Process:
             elif self.NESTING_LEVEL > 1:
                 self.NESTING_LEVEL -= 1
             else:
-                print("unknow error")
+                print("unknown error")
                 exit()
 
             assert self.STACK[self.FUNCTION_START] == Type.fend
@@ -163,7 +163,7 @@ class Process:
             self.STACK.append(t)
             self.STACK.append(value)
         else:
-            print("unknown command")
+            print("unknown command", v)
             exit()
         return True
 
