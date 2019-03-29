@@ -105,6 +105,8 @@ class Compilator:
                 else:
                     print("integers >= 256 not supported yet")
                     exit()
+            elif command.isidentifier():
+                self._addcommand(Type.fcall, command)
             else:
                 print('the command is not recognized:', command)
                 exit()
@@ -136,6 +138,9 @@ class Compilator:
 
         for i in range(0, len(byte_vector), 2):
             if byte_vector[i] == Type.fcall:
+                if not byte_vector[i + 1] in self.function_table:
+                    print("function", byte_vector[i + 1], "not found")
+                    exit()
                 byte_vector[i + 1] = self.function_table[byte_vector[i + 1]]
 
         with open(self.prog_name + '.bin', 'wb') as f:

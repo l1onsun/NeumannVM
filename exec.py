@@ -48,22 +48,21 @@ class Process:
 
 
     def run(self):
-        self.__debugprint()
+        #self.__debugprint()
         while (self._execNextCommand()):
-            self.__debugprint()
+            pass
+            #self.__debugprint()
 
     def _execNextCommand(self):
         t = int(self.STACK[self.INSTRUCTION_PTR])
         v = int(self.STACK[self.INSTRUCTION_PTR + 1])
         self.INSTRUCTION_PTR += 2
         if t == Type.command:
-            #print("command")
             return self._command(v)
         elif t == Type.byte:
             self.STACK.append(t)
             self.STACK.append(v)
         elif t == Type.arg:
-            #print("i am here")
             t, v = self._getarg(v)
             self.STACK.append(t)
             self.STACK.append(v)
@@ -84,7 +83,6 @@ class Process:
                 self.STACK.append(Flag.fcall)
             self.FUNCTION_START = len(self.STACK) - 2
         elif v == Command.newline:
-            #print(self.FUNCTION_START)
             self.STACK = self.STACK[:(self.FUNCTION_START + 2)]
         elif v == Command.ifjump:
             t, step = self._getargcmd(0)
@@ -136,7 +134,6 @@ class Process:
                 print("unknow error")
                 exit()
 
-            #print("test", self.STACK[self.FUNCTION_START], self.STACK[self.FUNCTION_START + 1])
             assert self.STACK[self.FUNCTION_START] == Type.fend
             self.INSTRUCTION_PTR = self.STACK[self.FUNCTION_START + 1] * 2
 
@@ -171,7 +168,6 @@ class Process:
         return True
 
     def _getarg(self, i):
-        #print(self.STACK[self.FUNCTION_START], self.STACK[self.FUNCTION_START + 1])
         t = int(self.STACK[self.FUNCTION_START - 2 * (i + 1)])
         v = int(self.STACK[self.FUNCTION_START - 2 * i - 1])
         return t, v
